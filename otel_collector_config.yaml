@@ -1,0 +1,39 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  batch:
+    timeout: 10s
+  resourcedetection:
+    detectors: [gce, ecs, ec2, azure, system]
+
+exporters:
+  datadog/api:
+    env: dev
+    service: OpenTelemetrySample
+    version: 1.0.0  
+
+    tags:
+      - example:tag
+
+    api:
+      key: [insert key here]
+      site: datadoghq.eu
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [nop/3, nop/4, otlp]
+  metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+  logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]

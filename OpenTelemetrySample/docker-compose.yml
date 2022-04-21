@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  web:
+    build: 
+      context: ./
+      dockerfile: ./OpenTelemetrySample/Dockerfile
+    ports:
+      - "5009:80"
+      - "5010:5001"
+    depends_on:
+     - datadog-agent
+    environment:
+      DD_ENV: "dev"
+      DD_SERVICE: "OpenTelemetrySample"
+      DD_VERSION: "1.0.0"
+      DD_AGENT_HOST: "datadog-agent"
+      DD_TRACE_ROUTE_TEMPLATE_RESOURCE_NAMES_ENABLED: "true"
+      DD_RUNTIME_METRICS_ENABLED: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://opentelemetry-collector:55680"
+      DD_TRACE_ENABLED: "true"
+  datadog-agent:
+    image: "gcr.io/datadoghq/agent:latest"
+    environment:
+      DD_APM_ENABLED: "true"
+      DD_APM_NON_LOCAL_TRAFFIC: "true"
+      DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
+      DD_API_KEY: [insert key]
+networks:
+  default:
+    external:
+      name: mikes-net
