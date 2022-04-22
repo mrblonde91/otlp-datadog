@@ -1,9 +1,5 @@
-using System;
 using System.Reflection;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Logs;
@@ -27,7 +23,7 @@ var log = new LoggerConfiguration() // using Serilog;
 var rb = ResourceBuilder.CreateDefault().AddService("OpenTelemetrySample",
     serviceVersion: assemblyVersion, serviceInstanceId: Environment.MachineName);
 
- var tracerProvider = Sdk.CreateTracerProviderBuilder()
+var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .AddSource("OpenTelemetrySample")
     .SetResourceBuilder(
         ResourceBuilder.CreateDefault().AddTelemetrySdk()
@@ -51,7 +47,7 @@ builder.Services.Configure<AspNetCoreInstrumentationOptions>(options =>
 {
     options.RecordException = true;
 });
-builder.Logging.ClearProviders();
+
 builder.Services.AddOpenTelemetryMetrics(options =>
 {
     options.SetResourceBuilder(rb).AddHttpClientInstrumentation().AddHttpClientInstrumentation()
@@ -76,7 +72,7 @@ builder.Logging.AddOpenTelemetry(options =>
     {
         otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/metrics");
     });
-    });
+});
 
 builder.Services.AddSwaggerGen();
 
@@ -94,5 +90,9 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapGet("/simple-api-call", ([FromServices] ILogger<Program> logger) => {
+    logger.LogInformation("entered simple api");
+});
 
 app.Run();
