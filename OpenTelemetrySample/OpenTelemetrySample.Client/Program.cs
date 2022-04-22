@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using OpenTelemetry;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetrySample.Contracts;
 using Serilog;
@@ -17,17 +18,23 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 // Activity
+var source = new ActivitySource("Client");
 using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Client"))
     .SetSampler(new AlwaysOnSampler())
     .AddSource("Client")
     .AddConsoleExporter()
+    .AddOtlpExporter(options =>
+    {
+        options.Endpoint = new Uri("http://localhost:4317/api/v1/trace");
+    })
     .Build();
 
 Activity.DefaultIdFormat = ActivityIdFormat.W3C;
 Activity.ForceDefaultIdFormat = true;
 
 // Make an api call
-var activity = new Activity("Client.Get").Start();
+using var activity = source.StartActivity("Get Simple Api Call", ActivityKind.Client);
 Log.Information("Client Activity: {@Activity}", activity);
 var client = new HttpClient();
 var response = await client.GetAsync($"http://localhost:5009/{Endpoints.GetSimpleApiCall}");

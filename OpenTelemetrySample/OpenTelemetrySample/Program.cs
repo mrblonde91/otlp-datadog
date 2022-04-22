@@ -7,6 +7,7 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using OpenTelemetrySample;
 using OpenTelemetrySample.Contracts;
 using Orleans;
 using Orleans.Configuration;
@@ -16,6 +17,7 @@ using Serilog.Events;
 using Microsoft.Extensions.Hosting;
 using Orleans.Statistics;
 
+ActivitySourcesSetup.Init();
 var builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
@@ -29,21 +31,19 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Host.UseSerilog();
-
 // Add services to the container.
 builder.SetupOrleansSilo();
 
 builder.Services.AddControllers();
 var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
-var rb = ResourceBuilder.CreateDefault().AddService("OpenTelemetrySample",
+var rb = ResourceBuilder.CreateDefault().AddService("Server",
     serviceVersion: assemblyVersion, serviceInstanceId: Environment.MachineName);
 
 var tracerProvider = Sdk.CreateTracerProviderBuilder().Build();
 
 builder.Services.AddOpenTelemetryTracing((options) =>
 {
-    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler())
-        .AddHttpClientInstrumentation().AddAspNetCoreInstrumentation();
+    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler()).AddHttpClientInstrumentation().AddAspNetCoreInstrumentation();
     options.AddOtlpExporter(otlpOptions =>
     {
         otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/trace");
@@ -57,9 +57,7 @@ builder.Services.Configure<AspNetCoreInstrumentationOptions>(options =>
 
 builder.Services.AddOpenTelemetryMetrics(options =>
 {
-    
     options.SetResourceBuilder(rb)
-        .AddHttpClientInstrumentation()
         .AddAspNetCoreInstrumentation();
     options.AddMeter("OpenTelemetrySample");
     options.AddOtlpExporter(otlpOptions =>
@@ -77,14 +75,14 @@ builder.Logging.AddOpenTelemetry(options =>
     options.IncludeScopes = true;
     options.ParseStateValues = true;
     options.IncludeFormattedMessage = true;
-     options.AddOtlpExporter(otlpOptions =>
-    {
-        otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/metrics");
-    });
+    options.AddOtlpExporter(otlpOptions =>
+   {
+       otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/metrics");
+   });
 });
 
 builder.Services.AddSwaggerGen();
- 
+
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();

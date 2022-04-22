@@ -21,15 +21,22 @@ public class HelloController : ControllerBase
     [HttpGet]
     public async Task<string> Get(string name)
     {
-        var activitySource = new ActivitySource("ExampleTracer");
-        using var activity = activitySource.StartActivity("100 ms delay", ActivityKind.Server);
+        using var activity = ActivitySourcesSetup.ActivitySource.StartActivity("100 ms delay", ActivityKind.Server);
+        if (activity == null)
+        {
+            _logger.LogError("Activity is null");
+            return "Activity is null";
+        }
+        activity?.SetStartTime(DateTime.Now);
         Baggage.Current.SetBaggage("Life Issues", "Plenty of them");
         await Task.Delay(100);
-        var activity2 = System.Diagnostics.Activity.Current;
-        _logger.LogInformation("{@activity}", activity2);
+
+        _logger.LogInformation("{@activity}", activity);
         var helloGrain = _grainFactory.GetGrain<IHelloGrain>(name);
         await helloGrain.SayHello(name);
 
+        activity?.SetTag("Test", $"{name}");
+        activity?.SetEndTime(DateTime.Now);
         _logger.LogInformation("Hello {Name}", name);
         return await Task.FromResult($"Hello {name}");
 
