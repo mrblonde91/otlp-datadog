@@ -1,14 +1,8 @@
-using System;
 using System.Diagnostics;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Datadog.Trace;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using OpenTelemetry;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-using Serilog.Context;
+
+namespace OpenTelemetrySample.Controllers;
 
 [ApiController]
 [Route("[controller]")]
