@@ -6,7 +6,7 @@ services:
       dockerfile: ./OpenTelemetrySample/Dockerfile
     ports:
       - "5009:80"
-      - "5010:5001"
+      - "5010:443"
     depends_on:
     - opentelemetry-collector
     environment:
@@ -19,14 +19,7 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://opentelemetry-collector:4318/api/v1/trace"
       DD_TRACE_ENABLED: "true"
       DD_LOGS_INJECTION: "true"
-  datadog-agent:
-    image: "gcr.io/datadoghq/agent:latest"
-    env_file:
-      - ./.secrets.env
-    environment:
-      DD_APM_ENABLED: "true"
-      DD_APM_NON_LOCAL_TRAFFIC: "true"
-      DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
+      DD_LOGS_INJECTION_ENABLED: "true"
   opentelemetry-collector:
     image: otel/opentelemetry-collector-contrib
     command: ["--config=/etc/otel/config.yaml"]
@@ -36,3 +29,7 @@ services:
     ports:
       - 4317:4317
       - 4318:4318
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - 9411:9411

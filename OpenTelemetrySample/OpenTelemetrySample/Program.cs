@@ -25,11 +25,11 @@ var log = new LoggerConfiguration() // using Serilog;
 var rb = ResourceBuilder.CreateDefault().AddService("OpenTelemetrySample",
     serviceVersion: assemblyVersion, serviceInstanceId: Environment.MachineName);
 
-var tracerProvider = Sdk.CreateTracerProviderBuilder()
-    .AddSource("OpenTelemetrySample")
+ var tracerProvider = Sdk.CreateTracerProviderBuilder()
+    .AddSource("OpenTelemetrySampleTracer")
     .SetResourceBuilder(
         ResourceBuilder.CreateDefault().AddTelemetrySdk()
-            .AddService(serviceName: "OpenTelemetrySample"))
+            .AddService(serviceName: "ServiceA"))
     .AddOtlpExporter(options => 
         options.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/trace"))
     .Build();
