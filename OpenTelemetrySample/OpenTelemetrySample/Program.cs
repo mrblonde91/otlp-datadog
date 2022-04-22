@@ -34,16 +34,15 @@ var rb = ResourceBuilder.CreateDefault().AddService("OpenTelemetrySample",
     serviceVersion: assemblyVersion, serviceInstanceId: Environment.MachineName);
 
  var tracerProvider = Sdk.CreateTracerProviderBuilder().Build();
-builder.Services.AddSingleton(tracerProvider);
 
 builder.Services.AddOpenTelemetryTracing((options) =>
-{
+{    
+    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler())
+        .AddHttpClientInstrumentation().AddAspNetCoreInstrumentation();
     options.AddOtlpExporter(otlpOptions =>
     {
         otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/trace");
     });
-    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler())
-        .AddHttpClientInstrumentation().AddAspNetCoreInstrumentation();
 });
 
 builder.Services.Configure<AspNetCoreInstrumentationOptions>(options =>
@@ -67,6 +66,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Logging.AddOpenTelemetry(options =>
 {
+    options.SetResourceBuilder(rb);
     options.IncludeScopes = true;
     options.ParseStateValues = true;
     options.IncludeFormattedMessage = true;
