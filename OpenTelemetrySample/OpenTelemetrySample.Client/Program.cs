@@ -38,33 +38,8 @@ Activity.DefaultIdFormat = ActivityIdFormat.W3C;
 Activity.ForceDefaultIdFormat = true;
 
 // Make an api call
-await SimpleCall();
-await OrleansCall();
-
-async Task SimpleCall()
-{        
-    using (LogContext.PushProperty("dd_trace_id", CorrelationIdentifier.TraceId.ToString()))
-    using (LogContext.PushProperty("dd_span_id", CorrelationIdentifier.SpanId.ToString()))
-    {
-        using var activity =
-            ActivitySourcesSetup.ActivitySource.StartActivity("Get Simple Api Call", ActivityKind.Client);
-        Log.Information("Client Activity: {@Activity}", activity);
-        var client = new HttpClient();
-        var response = await client.GetAsync($"http://localhost:5009/{Endpoints.GetSimpleApiCall}");
-        activity?.Stop();
-    }
-}
-
-async Task OrleansCall()
-{        
-    using (LogContext.PushProperty("dd_trace_id", CorrelationIdentifier.TraceId.ToString()))
-    using (LogContext.PushProperty("dd_span_id", CorrelationIdentifier.SpanId.ToString()))
-    {
-        using var activity =
-            ActivitySourcesSetup.ActivitySource.StartActivity("Get Orleans Api Call", ActivityKind.Client);
-        Log.Information("Client Activity: {@Activity}", activity);
-        var client = new HttpClient();
-        var response = await client.GetAsync($"http://localhost:5009/{Endpoints.GetOrleansApiCall}");
-        activity?.Stop();
-    }
-}
+var activity = new Activity("Client.Get").Start();
+Log.Information("Client started");
+Log.Information("Current Activity: {@Activity}", activity);
+var client = new HttpClient();
+var response = await client.GetAsync($"http://localhost:5009/{Endpoints.GetSimpleApiCall}");
