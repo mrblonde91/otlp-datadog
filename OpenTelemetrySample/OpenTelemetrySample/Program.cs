@@ -16,10 +16,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .Enrich.WithSpan()
     .WriteTo.Console()
-    .WriteTo.Seq("http://localhost:5341")
+    .WriteTo.Seq("http://seq:5341")
     .Enrich.WithProperty("Application", "Server")
     .Enrich.FromLogContext()
     .CreateLogger();
@@ -33,28 +33,16 @@ var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToStrin
 var rb = ResourceBuilder.CreateDefault().AddService("OpenTelemetrySample",
     serviceVersion: assemblyVersion, serviceInstanceId: Environment.MachineName);
 
-var tracerProvider = Sdk.CreateTracerProviderBuilder()
-   .AddSource("OpenTelemetrySample")
-   .SetResourceBuilder(
-       ResourceBuilder.CreateDefault().AddTelemetrySdk()
-           .AddService(serviceName: "OpenTelemetrySample"))
-   .AddOtlpExporter(options =>
-       options.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/trace"))
-   .Build();
-builder.Services.AddSingleton(tracerProvider);
+var tracerProvider = Sdk.CreateTracerProviderBuilder().Build();
 
 builder.Services.AddOpenTelemetryTracing((options) =>
 {
+    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler())
+        .AddHttpClientInstrumentation().AddAspNetCoreInstrumentation();
     options.AddOtlpExporter(otlpOptions =>
     {
         otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/trace");
     });
-    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler())
-        .AddHttpClientInstrumentation()
-        .AddAspNetCoreInstrumentation();
-    options.AddSource("orleans.runtime.graincall");
-
-
 });
 
 builder.Services.Configure<AspNetCoreInstrumentationOptions>(options =>
@@ -78,6 +66,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Logging.AddOpenTelemetry(options =>
 {
+    options.SetResourceBuilder(rb);
     options.IncludeScopes = true;
     options.ParseStateValues = true;
     options.IncludeFormattedMessage = true;
@@ -91,17 +80,8 @@ builder.Logging.AddOpenTelemetry(options =>
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.MapControllers();
 
@@ -109,8 +89,7 @@ app.MapGet(Endpoints.GetSimpleApiCall, ([FromServices] ILogger<Program> logger) 
 {
     var currentActivity = Activity.Current;
 
-    logger.LogInformation("Current Activity: {@Activity}", currentActivity);
-    logger.LogInformation("entered simple api");
+    logger.LogInformation("Server Activity: {@Activity}", currentActivity);
 });
 
 app.Run();

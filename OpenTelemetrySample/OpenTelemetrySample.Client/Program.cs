@@ -8,7 +8,7 @@ using Serilog.Events;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .Enrich.WithSpan()
     .WriteTo.Console()
     .WriteTo.Seq("http://localhost:5341")
@@ -28,7 +28,6 @@ Activity.ForceDefaultIdFormat = true;
 
 // Make an api call
 var activity = new Activity("Client.Get").Start();
-Log.Information("Client started");
-Log.Information("Current Activity: {@Activity}", activity);
+Log.Information("Client Activity: {@Activity}", activity);
 var client = new HttpClient();
 var response = await client.GetAsync($"http://localhost:5009/{Endpoints.GetSimpleApiCall}");
