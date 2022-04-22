@@ -6,6 +6,7 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using OpenTelemetrySample.Contracts;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Formatting.Json;
@@ -91,7 +92,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGet("/simple-api-call", ([FromServices] ILogger<Program> logger) => {
+app.MapGet(Endpoints.GetSimpleApiCall, ([FromServices] ILogger<Program> logger) => {
     logger.LogInformation("entered simple api");
 });
 
