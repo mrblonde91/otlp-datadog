@@ -1,0 +1,52 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+  zipkin:
+  # hostmetrics:
+  #   scrapers:
+  #     cpu:
+  #     disk:
+  #     filesystem:
+  #     load:
+  #     memory:
+  #     network:
+  #     process:
+  #     processes:
+processors:
+  batch:
+    timeout: 10s
+  resourcedetection:
+    detectors: [gce, ecs, ec2, azure, system]
+exporters:
+  datadog/api:
+    env: dev
+    service: opentelemetrysample
+    version: 1.0.0
+
+    tags:
+      - otlp:tag
+
+    api:
+      key: api_key
+      site: datadoghq.com
+  zipkin:
+    endpoint: "http://zipkin:9411/api/v2/spans"
+  logging:
+    loglevel: debug
+extensions:
+  health_check:
+  pprof:
+  zpages:
+service:
+  extensions: [health_check,pprof,zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [datadog/api, logging, zipkin]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [datadog/api,logging]

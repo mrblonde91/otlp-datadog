@@ -45,7 +45,7 @@ using var traceprovider = Sdk.CreateTracerProviderBuilder()
 builder.Services.AddOpenTelemetryTracing((options) =>
 {
     options.AddSource("OpenTelemetrySample.Tracing");
-    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler()).AddAspNetCoreInstrumentation();
+    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler()).AddAspNetCoreInstrumentation().AddHttpClientInstrumentation();
     options.AddOtlpExporter(otlpOptions =>
     {
         otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/trace");
