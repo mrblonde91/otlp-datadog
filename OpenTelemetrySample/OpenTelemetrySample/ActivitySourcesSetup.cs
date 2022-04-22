@@ -8,7 +8,7 @@ public static class ActivitySourcesSetup
 
     public static void Init()
     {
-        ActivitySource = new ActivitySource("Sample.DistributedTracing","1.0.0");
+        ActivitySource = new ActivitySource("OpenTelemetrySample.Tracing","1.0.0");
         var listener = new ActivityListener()
         {
             ShouldListenTo = _ => true,
