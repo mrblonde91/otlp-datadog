@@ -50,7 +50,11 @@ builder.Services.AddOpenTelemetryTracing((options) =>
         otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/trace");
     });
     options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler())
-        .AddHttpClientInstrumentation().AddAspNetCoreInstrumentation();
+        .AddHttpClientInstrumentation()
+        .AddAspNetCoreInstrumentation();
+    options.AddSource("orleans.runtime.graincall");
+
+
 });
 
 builder.Services.Configure<AspNetCoreInstrumentationOptions>(options =>

@@ -25,11 +25,13 @@ public class HelloController : ControllerBase
         using var activity = activitySource.StartActivity("100 ms delay", ActivityKind.Server);
         Baggage.Current.SetBaggage("Life Issues", "Plenty of them");
         await Task.Delay(100);
+        var activity2 = System.Diagnostics.Activity.Current;
+        _logger.LogInformation("{@activity}", activity2);
         var helloGrain = _grainFactory.GetGrain<IHelloGrain>(name);
         await helloGrain.SayHello(name);
 
         _logger.LogInformation("Hello {Name}", name);
         return await Task.FromResult($"Hello {name}");
-        
+
     }
 }
