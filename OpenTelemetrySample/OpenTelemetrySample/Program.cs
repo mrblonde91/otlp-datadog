@@ -38,12 +38,14 @@ builder.Services.AddControllers();
 var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
 var rb = ResourceBuilder.CreateDefault().AddService("Server",
     serviceVersion: assemblyVersion, serviceInstanceId: Environment.MachineName);
-
-var tracerProvider = Sdk.CreateTracerProviderBuilder().Build();
+using var traceprovider = Sdk.CreateTracerProviderBuilder()
+    .SetResourceBuilder(rb)
+    .AddSource("OpenTelemetrySample.Tracing").Build();
 
 builder.Services.AddOpenTelemetryTracing((options) =>
 {
-    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler()).AddHttpClientInstrumentation().AddAspNetCoreInstrumentation();
+    options.AddSource("OpenTelemetrySample.Tracing");
+    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler()).AddAspNetCoreInstrumentation();
     options.AddOtlpExporter(otlpOptions =>
     {
         otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/trace");
@@ -59,7 +61,7 @@ builder.Services.AddOpenTelemetryMetrics(options =>
 {
     options.SetResourceBuilder(rb)
         .AddAspNetCoreInstrumentation();
-    options.AddMeter("OpenTelemetrySample");
+    options.AddMeter("OpenTelemetrySample.Meter");
     options.AddOtlpExporter(otlpOptions =>
     {
         otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/metrics");
