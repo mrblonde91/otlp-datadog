@@ -8,9 +8,13 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetrySample.Contracts;
+using Orleans;
+using Orleans.Configuration;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
+using Microsoft.Extensions.Hosting;
+using Orleans.Statistics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +32,7 @@ builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.SetupOrleansSilo();
+
 builder.Services.AddControllers();
 var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
 var rb = ResourceBuilder.CreateDefault().AddService("OpenTelemetrySample",
@@ -52,7 +57,9 @@ builder.Services.Configure<AspNetCoreInstrumentationOptions>(options =>
 
 builder.Services.AddOpenTelemetryMetrics(options =>
 {
-    options.SetResourceBuilder(rb).AddHttpClientInstrumentation()
+    
+    options.SetResourceBuilder(rb)
+        .AddHttpClientInstrumentation()
         .AddAspNetCoreInstrumentation();
     options.AddMeter("OpenTelemetrySample");
     options.AddOtlpExporter(otlpOptions =>
@@ -70,20 +77,21 @@ builder.Logging.AddOpenTelemetry(options =>
     options.IncludeScopes = true;
     options.ParseStateValues = true;
     options.IncludeFormattedMessage = true;
-    options.SetResourceBuilder(rb);
-    options.AddOtlpExporter(otlpOptions =>
+     options.AddOtlpExporter(otlpOptions =>
     {
         otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/metrics");
     });
 });
 
 builder.Services.AddSwaggerGen();
-
+ 
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapControllers();
+
+
 
 app.MapGet(Endpoints.GetSimpleApiCall, ([FromServices] ILogger<Program> logger) =>
 {

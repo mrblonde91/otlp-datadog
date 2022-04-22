@@ -13,9 +13,12 @@ internal static class OrleansSiloModule
             siloBuilder.AddActivityPropagation();
 
             siloBuilder.UseLinuxEnvironmentStatistics();
+            
 
         });
 
+       
+ 
         return builder;
     }
 }
