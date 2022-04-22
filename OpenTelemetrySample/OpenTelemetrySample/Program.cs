@@ -31,7 +31,7 @@ builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
 var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
-var rb = ResourceBuilder.CreateDefault().AddService("OpenTelemetrySample",
+var rb = ResourceBuilder.CreateDefault().AddService("Server",
     serviceVersion: assemblyVersion, serviceInstanceId: Environment.MachineName);
 
  var tracerProvider = Sdk.CreateTracerProviderBuilder().Build();
