@@ -31,4 +31,4 @@ var activity = new Activity("Client.Get").Start();
 Log.Information("Client started");
 Log.Information("Current Activity: {@Activity}", activity);
 var client = new HttpClient();
-var response = await client.GetAsync($"https://localhost:5009/{Endpoints.GetSimpleApiCall}");
+var response = await client.GetAsync($"http://localhost:5009/{Endpoints.GetSimpleApiCall}");

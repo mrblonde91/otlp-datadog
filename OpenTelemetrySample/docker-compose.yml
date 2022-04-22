@@ -29,6 +29,12 @@ services:
     ports:
       - 4317:4317
       - 4318:4318
+  datadog-agent:
+    image: "gcr.io/datadoghq/agent:latest"
+    environment:
+      DD_APM_ENABLED: "true"
+      DD_APM_NON_LOCAL_TRAFFIC: "true"
+      DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
   zipkin:
     image: openzipkin/zipkin
     ports:
