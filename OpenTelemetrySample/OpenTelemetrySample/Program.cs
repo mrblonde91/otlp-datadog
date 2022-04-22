@@ -7,11 +7,13 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using OpenTelemetrySample;
 using OpenTelemetrySample.Contracts;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
 
+ActivitySourcesSetup.Init();
 var builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
@@ -25,7 +27,6 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Host.UseSerilog();
-
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -36,9 +37,8 @@ var rb = ResourceBuilder.CreateDefault().AddService("OpenTelemetrySample",
  var tracerProvider = Sdk.CreateTracerProviderBuilder().Build();
 
 builder.Services.AddOpenTelemetryTracing((options) =>
-{    
-    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler())
-        .AddHttpClientInstrumentation().AddAspNetCoreInstrumentation();
+{                            
+    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler()).AddHttpClientInstrumentation().AddAspNetCoreInstrumentation();
     options.AddOtlpExporter(otlpOptions =>
     {
         otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/trace");
@@ -52,7 +52,7 @@ builder.Services.Configure<AspNetCoreInstrumentationOptions>(options =>
 
 builder.Services.AddOpenTelemetryMetrics(options =>
 {
-    options.SetResourceBuilder(rb).AddHttpClientInstrumentation()
+    options.SetResourceBuilder(rb)
         .AddAspNetCoreInstrumentation();
     options.AddMeter("OpenTelemetrySample");
     options.AddOtlpExporter(otlpOptions =>

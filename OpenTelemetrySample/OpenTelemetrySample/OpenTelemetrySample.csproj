@@ -23,6 +23,7 @@
         <PackageReference Include="Serilog.Sinks.Console" Version="4.0.2-dev-00890" />
         <PackageReference Include="Serilog.Sinks.Seq" Version="5.1.1" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.0" />
+        <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
     </ItemGroup>
 
     <ItemGroup>
