@@ -27,13 +27,20 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // Add services to the container.
-
+builder.SetupOrleansSilo();
 builder.Services.AddControllers();
 var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
 var rb = ResourceBuilder.CreateDefault().AddService("OpenTelemetrySample",
     serviceVersion: assemblyVersion, serviceInstanceId: Environment.MachineName);
 
- var tracerProvider = Sdk.CreateTracerProviderBuilder().Build();
+var tracerProvider = Sdk.CreateTracerProviderBuilder()
+   .AddSource("OpenTelemetrySample")
+   .SetResourceBuilder(
+       ResourceBuilder.CreateDefault().AddTelemetrySdk()
+           .AddService(serviceName: "OpenTelemetrySample"))
+   .AddOtlpExporter(options =>
+       options.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/trace"))
+   .Build();
 builder.Services.AddSingleton(tracerProvider);
 
 builder.Services.AddOpenTelemetryTracing((options) =>

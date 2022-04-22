@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry;
+using Orleans;
 
 namespace OpenTelemetrySample.Controllers;
 
@@ -9,10 +10,12 @@ namespace OpenTelemetrySample.Controllers;
 public class HelloController : ControllerBase
 {
     private readonly ILogger<HelloController> _logger;
+    private readonly IGrainFactory _grainFactory;
 
-    public HelloController(ILogger<HelloController> logger)
+    public HelloController(ILogger<HelloController> logger, IGrainFactory grainFactory)
     {
         _logger = logger;
+        _grainFactory = grainFactory;
     }
 
     [HttpGet]
@@ -22,6 +25,8 @@ public class HelloController : ControllerBase
         using var activity = activitySource.StartActivity("100 ms delay", ActivityKind.Server);
         Baggage.Current.SetBaggage("Life Issues", "Plenty of them");
         await Task.Delay(100);
+        var helloGrain = _grainFactory.GetGrain<IHelloGrain>(name);
+        await helloGrain.SayHello(name);
 
         _logger.LogInformation("Hello {Name}", name);
         return await Task.FromResult($"Hello {name}");
