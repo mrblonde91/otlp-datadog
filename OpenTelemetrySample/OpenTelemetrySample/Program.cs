@@ -26,7 +26,7 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.WithSpan()
     .WriteTo.Console()
     .WriteTo.Seq("http://seq:5341")
-    .Enrich.WithProperty("Application", "Server")
+    .Enrich.WithProperty("Application", "OpenTelemetrySample.Traffic")
     .Enrich.FromLogContext()
     .CreateLogger();
 
