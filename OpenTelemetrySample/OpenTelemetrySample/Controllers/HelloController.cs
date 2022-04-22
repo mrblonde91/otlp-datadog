@@ -28,9 +28,7 @@ public class HelloController : ControllerBase
         using var activity = activitySource.StartActivity("100 ms delay", ActivityKind.Server);
         Baggage.Current.SetBaggage("Life Issues", "Plenty of them");
         await Task.Delay(100);
-        
-        using var client = new HttpClient();
-        _ = await client.GetAsync("http://web-b:80/ping");
+
         _logger.LogInformation("Hello {Name}", name);
         return await Task.FromResult($"Hello {name}");
         
