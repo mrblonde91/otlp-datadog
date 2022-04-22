@@ -91,13 +91,21 @@ app.UseSwaggerUI();
 
 app.MapControllers();
 
-
-
 app.MapGet(Endpoints.GetSimpleApiCall, ([FromServices] ILogger<Program> logger) =>
 {
     var currentActivity = Activity.Current;
 
     logger.LogInformation("Server Activity: {@Activity}", currentActivity);
+});
+
+app.MapGet(Endpoints.GetOrleansApiCall, async ([FromServices] ILogger<Program> logger, [FromServices] IGrainFactory grainFactory) =>
+{
+    const string name = "Orleans";
+    var currentActivity = Activity.Current;
+    logger.LogInformation("Server Activity: {@Activity}", currentActivity);
+    
+    var helloGrain = grainFactory.GetGrain<IHelloGrain>(name);
+    await helloGrain.SayHello(name);
 });
 
 app.Run();
