@@ -1,14 +1,14 @@
 version: "3.9"
 services:
   web:
-    build: 
+    build:
       context: ./
       dockerfile: ./OpenTelemetrySample/Dockerfile
     ports:
       - "5009:80"
       - "5010:443"
     depends_on:
-    - opentelemetry-collector
+      - opentelemetry-collector
     environment:
       DD_ENV: "dev"
       DD_SERVICE: "OpenTelemetrySample"
@@ -22,7 +22,7 @@ services:
       DD_LOGS_INJECTION_ENABLED: "true"
   opentelemetry-collector:
     image: otel/opentelemetry-collector-contrib
-    command: ["--config=/etc/otel/config.yaml"]
+    command: [ "--config=/etc/otel/config.yaml" ]
     privileged: true
     volumes:
       - ./etc/otel/otel-collector-config.yaml:/etc/otel/config.yaml
@@ -41,3 +41,12 @@ services:
     image: openzipkin/zipkin
     ports:
       - 9411:9411
+
+  seq:
+    image: datalust/seq:latest
+    restart: always
+    ports:
+      - "5342:80"
+      - "5341:5341"
+    environment:
+      - ACCEPT_EULA=Y
