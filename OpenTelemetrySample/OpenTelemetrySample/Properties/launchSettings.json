@@ -15,7 +15,7 @@
       "launchBrowser": true,
       "launchUrl": "http://localhost:5009/swagger",
       "environmentVariables": {
-        "ASPNETCORE_URLS": "https://localhost:5009",
+        "ASPNETCORE_URLS": "http://localhost:5009",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "CORECLR_ENABLE_PROFILING":"1",
         "CORECLR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}"

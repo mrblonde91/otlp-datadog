@@ -16,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .Enrich.WithSpan()
     .WriteTo.Console()
     .WriteTo.Seq("http://localhost:5341")
@@ -83,18 +83,13 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
 app.MapControllers();
 
 app.MapGet(Endpoints.GetSimpleApiCall, ([FromServices] ILogger<Program> logger) =>
 {
     var currentActivity = Activity.Current;
 
-    logger.LogInformation("Current Activity: {@Activity}", currentActivity);
-    logger.LogInformation("entered simple api");
+    logger.LogInformation("Server Activity: {@Activity}", currentActivity);
 });
 
 app.Run();
