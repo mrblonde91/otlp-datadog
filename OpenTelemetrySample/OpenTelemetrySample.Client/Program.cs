@@ -34,7 +34,23 @@ Activity.DefaultIdFormat = ActivityIdFormat.W3C;
 Activity.ForceDefaultIdFormat = true;
 
 // Make an api call
-using var activity = source.StartActivity("Get Simple Api Call", ActivityKind.Client);
-Log.Information("Client Activity: {@Activity}", activity);
-var client = new HttpClient();
-var response = await client.GetAsync($"http://localhost:5009/{Endpoints.GetSimpleApiCall}");
+await SimpleCall();
+await OrleansCall();
+
+async Task SimpleCall()
+{
+    using var activity = source.StartActivity("Get Simple Api Call", ActivityKind.Client);
+    Log.Information("Client Activity: {@Activity}", activity);
+    var client = new HttpClient();
+    var response = await client.GetAsync($"http://localhost:5009/{Endpoints.GetSimpleApiCall}");
+    activity?.Stop();
+}
+
+async Task OrleansCall()
+{
+    using var activity = source.StartActivity("Get Orleans Api Call", ActivityKind.Client);
+    Log.Information("Client Activity: {@Activity}", activity);
+    var client = new HttpClient();
+    var response = await client.GetAsync($"http://localhost:5009/{Endpoints.GetOrleansApiCall}");
+    activity?.Stop();
+}
