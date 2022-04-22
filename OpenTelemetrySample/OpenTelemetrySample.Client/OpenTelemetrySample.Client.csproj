@@ -11,4 +11,9 @@
       <ProjectReference Include="..\OpenTelemetrySample.Contracts\OpenTelemetrySample.Contracts.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="OpenTelemetry" Version="1.2.0" />
+      <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.2.0" />
+    </ItemGroup>
+
 </Project>

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry;
@@ -92,7 +93,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGet(Endpoints.GetSimpleApiCall, ([FromServices] ILogger<Program> logger) => {
+app.MapGet(Endpoints.GetSimpleApiCall, ([FromServices] ILogger<Program> logger) =>
+{
+    var currentActivity = Activity.Current;
+
+    logger.LogInformation("Current Activity: {@Activity}", currentActivity);
     logger.LogInformation("entered simple api");
 });
 
