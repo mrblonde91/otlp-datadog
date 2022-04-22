@@ -19,7 +19,7 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .Enrich.WithSpan()
     .WriteTo.Console()
-    .WriteTo.Seq("http://localhost:5341")
+    .WriteTo.Seq("http://seq:5341")
     .Enrich.WithProperty("Application", "Server")
     .Enrich.FromLogContext()
     .CreateLogger();
