@@ -1,15 +1,13 @@
-using System;
+using System.Diagnostics;
 using System.Reflection;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using OpenTelemetrySample.Contracts;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Formatting.Json;
@@ -27,7 +25,7 @@ var log = new LoggerConfiguration() // using Serilog;
 var rb = ResourceBuilder.CreateDefault().AddService("OpenTelemetrySample",
     serviceVersion: assemblyVersion, serviceInstanceId: Environment.MachineName);
 
- var tracerProvider = Sdk.CreateTracerProviderBuilder()
+var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .AddSource("OpenTelemetrySample")
     .SetResourceBuilder(
         ResourceBuilder.CreateDefault().AddTelemetrySdk()
@@ -51,7 +49,7 @@ builder.Services.Configure<AspNetCoreInstrumentationOptions>(options =>
 {
     options.RecordException = true;
 });
-builder.Logging.ClearProviders();
+
 builder.Services.AddOpenTelemetryMetrics(options =>
 {
     options.SetResourceBuilder(rb).AddHttpClientInstrumentation().AddHttpClientInstrumentation()
@@ -76,7 +74,7 @@ builder.Logging.AddOpenTelemetry(options =>
     {
         otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/metrics");
     });
-    });
+});
 
 builder.Services.AddSwaggerGen();
 
@@ -94,5 +92,13 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapGet(Endpoints.GetSimpleApiCall, ([FromServices] ILogger<Program> logger) =>
+{
+    var currentActivity = Activity.Current;
+
+    logger.LogInformation("Current Activity: {@Activity}", currentActivity);
+    logger.LogInformation("entered simple api");
+});
 
 app.Run();
