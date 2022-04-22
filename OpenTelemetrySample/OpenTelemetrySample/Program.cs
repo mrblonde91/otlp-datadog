@@ -10,18 +10,26 @@ using OpenTelemetry.Trace;
 using OpenTelemetrySample.Contracts;
 using Serilog;
 using Serilog.Enrichers.Span;
-using Serilog.Formatting.Json;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.WithSpan()
+    .WriteTo.Console()
+    .WriteTo.Seq("http://localhost:5341")
+    .Enrich.WithProperty("Application", "Server")
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // Add services to the container.
 
 builder.Services.AddControllers();
 var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
-var log = new LoggerConfiguration() // using Serilog;
-    .Enrich.WithSpan()
-    .WriteTo.Console(new JsonFormatter(renderMessage: true))
-    .CreateLogger();
 var rb = ResourceBuilder.CreateDefault().AddService("OpenTelemetrySample",
     serviceVersion: assemblyVersion, serviceInstanceId: Environment.MachineName);
 
