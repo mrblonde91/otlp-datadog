@@ -26,7 +26,7 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.WithSpan()
     .WriteTo.Console()
     .WriteTo.Seq("http://seq:5341")
-    .Enrich.WithProperty("Application", "OpenTelemetrySample.Traffic")
+    .Enrich.WithProperty("Application", "OpenTelemetrySample")
     .Enrich.FromLogContext()
     .CreateLogger();
 
@@ -36,7 +36,7 @@ builder.SetupOrleansSilo();
 
 builder.Services.AddControllers();
 var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
-var rb = ResourceBuilder.CreateDefault().AddService("Server",
+var rb = ResourceBuilder.CreateDefault().AddService("OpenTelemetrySample.OTLP",
     serviceVersion: assemblyVersion, serviceInstanceId: Environment.MachineName);
 using var traceprovider = Sdk.CreateTracerProviderBuilder()
     .SetResourceBuilder(rb)
