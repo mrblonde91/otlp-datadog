@@ -20,12 +20,15 @@ services:
       DD_TRACE_ENABLED: "true"
       DD_LOGS_INJECTION: "true"
       DD_LOGS_INJECTION_ENABLED: "true"
+    volumes:
+      - $HOME/.aws/credentials:/home/app/.aws/credentials:ro
   opentelemetry-collector:
     image: otel/opentelemetry-collector-contrib
     command: [ "--config=/etc/otel/config.yaml" ]
     privileged: true
     volumes:
       - ./etc/otel/otel-collector-config.yaml:/etc/otel/config.yaml
+
     ports:
       - 4317:4317
       - 4318:4318

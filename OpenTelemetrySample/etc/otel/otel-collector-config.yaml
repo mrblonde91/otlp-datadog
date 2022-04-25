@@ -29,7 +29,7 @@ exporters:
       - otlp:tag
 
     api:
-      key: api_key
+      key: apikey
       site: datadoghq.com
   zipkin:
     endpoint: "http://zipkin:9411/api/v2/spans"

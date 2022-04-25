@@ -15,6 +15,7 @@ using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
 using Microsoft.Extensions.Hosting;
+using OpenTelemetrySample.Services;
 using Orleans.Statistics;
 
 ActivitySourcesSetup.Init();
@@ -68,6 +69,8 @@ builder.Services.AddOpenTelemetryMetrics(options =>
 
     });
 });
+
+builder.Services.AddTransient<IDynamoService, DynamoService>();
 
 builder.Services.AddEndpointsApiExplorer();
 

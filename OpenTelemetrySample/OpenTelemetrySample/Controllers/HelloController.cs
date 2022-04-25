@@ -1,7 +1,10 @@
 using System.Diagnostics;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
 using Datadog.Trace;
 using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry;
+using OpenTelemetrySample.Services;
 using Orleans;
 using Serilog.Context;
 
@@ -13,11 +16,13 @@ public class HelloController : ControllerBase
 {
     private readonly ILogger<HelloController> _logger;
     private readonly IGrainFactory _grainFactory;
+    private readonly IDynamoService _dynamoService;
 
-    public HelloController(ILogger<HelloController> logger, IGrainFactory grainFactory)
+    public HelloController(ILogger<HelloController> logger, IGrainFactory grainFactory, IDynamoService dynamoService)
     {
         _logger = logger;
         _grainFactory = grainFactory;
+        _dynamoService = dynamoService;
     }
 
     [HttpGet]
@@ -37,14 +42,14 @@ public class HelloController : ControllerBase
             }
 
             activity?.SetStartTime(DateTime.Now);
-            Baggage.Current.SetBaggage("Life Issues", "Plenty of them");
-            await Task.Delay(100);
+            Baggage.Current = Baggage.Create(new Dictionary<string, string>(){{"name", name}});
 
             _logger.LogInformation("{@activity}", activity);
             var helloGrain = _grainFactory.GetGrain<IHelloGrain>(name);
             await helloGrain.SayHello(name);
 
             activity?.SetTag("Test", $"{name}");
+            await _dynamoService.PutItem(name);
             activity?.SetEndTime(DateTime.Now);
             _logger.LogInformation("Hello {Name}", name);
             return await Task.FromResult($"Hello {name}");
