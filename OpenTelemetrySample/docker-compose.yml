@@ -32,6 +32,7 @@ services:
     ports:
       - 4317:4317
       - 4318:4318
+      - 8989:8989
   datadog-agent:
     image: "gcr.io/datadoghq/agent:latest"
     env_file:
@@ -53,3 +54,10 @@ services:
       - "5341:5341"
     environment:
       - ACCEPT_EULA=Y
+  prometheus:
+    image: prom/prometheus:v2.30.3
+    ports:
+      - 9000:9090
+    volumes:
+    - ./prometheus:/etc/prometheus
+    command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yaml

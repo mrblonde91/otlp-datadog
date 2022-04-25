@@ -7,10 +7,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8b3fa1ea-5a81-4e68-ace3-a1c24d1ba0c7" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/OpenTelemetrySample/Services/DynamoService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTelemetrySample/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenTelemetrySample/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenTelemetrySample.Client/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenTelemetrySample.Client/Program.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenTelemetrySample/Controllers/HelloController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenTelemetrySample/Controllers/HelloController.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenTelemetrySample/Grains/HelloGrain.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenTelemetrySample/Grains/HelloGrain.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenTelemetrySample/OpenTelemetrySample.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/OpenTelemetrySample/OpenTelemetrySample.csproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenTelemetrySample/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenTelemetrySample/Program.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/etc/otel/otel-collector-config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/etc/otel/otel-collector-config.yaml" afterDir="false" />
@@ -51,12 +51,12 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "WebServerToolWindowFactoryState": "false",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected=".NET Launch Settings Profile.OpenTelemetrySample">
     <configuration name="OpenTelemetrySample.Client" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />
@@ -117,7 +117,7 @@
       <updated>1648471732670</updated>
       <workItem from="1648471736877" duration="19936000" />
       <workItem from="1650374342854" duration="20425000" />
-      <workItem from="1650621178080" duration="18426000" />
+      <workItem from="1650621178080" duration="21292000" />
     </task>
     <servers />
   </component>
@@ -146,10 +146,10 @@
           <line>44</line>
           <properties documentPath="$PROJECT_DIR$/OpenTelemetrySample/Controllers/HelloController.cs" initialLine="39" containingFunctionPresentation="method 'Get'">
             <startOffsets>
-              <option value="1615" />
+              <option value="1644" />
             </startOffsets>
             <endOffsets>
-              <option value="1698" />
+              <option value="1727" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="8" />
@@ -168,40 +168,14 @@
           <option name="timeStamp" value="10" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/OpenTelemetrySample/Grains/HelloGrain.cs</url>
-          <line>15</line>
-          <properties documentPath="$PROJECT_DIR$/OpenTelemetrySample/Grains/HelloGrain.cs" initialLine="15" containingFunctionPresentation="method 'SayHello'">
-            <startOffsets>
-              <option value="308" />
-            </startOffsets>
-            <endOffsets>
-              <option value="370" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="11" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/OpenTelemetrySample/Grains/HelloGrain.cs</url>
-          <line>22</line>
-          <properties documentPath="$PROJECT_DIR$/OpenTelemetrySample/Grains/HelloGrain.cs" initialLine="23" containingFunctionPresentation="method 'SayHello'">
-            <startOffsets>
-              <option value="733" />
-            </startOffsets>
-            <endOffsets>
-              <option value="733" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="12" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/OpenTelemetrySample/Controllers/HelloController.cs</url>
           <line>51</line>
           <properties documentPath="$PROJECT_DIR$/OpenTelemetrySample/Controllers/HelloController.cs" initialLine="51" containingFunctionPresentation="method 'Get'">
             <startOffsets>
-              <option value="1940" />
+              <option value="1969" />
             </startOffsets>
             <endOffsets>
-              <option value="1975" />
+              <option value="2004" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="13" />

@@ -13,20 +13,20 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.WithSpan()
     .WriteTo.Console()
     .WriteTo.Seq("http://localhost:5341")
-    .Enrich.WithProperty("Application", "Client")
+    .Enrich.WithProperty("Application", "OpenTelemetrySample.Client")
     .Enrich.FromLogContext()
     .CreateLogger();
 
 // Activity
 var source = new ActivitySource("Client");
 using var tracerProvider = Sdk.CreateTracerProviderBuilder()
-    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Client"))
+    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("OpenTelemetrySample.Client"))
     .SetSampler(new AlwaysOnSampler())
     .AddSource("Client")
     .AddConsoleExporter()
     .AddOtlpExporter(options =>
     {
-        options.Endpoint = new Uri("http://localhost:4317/api/v1/trace");
+        options.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/trace");
     })
     .Build();
 

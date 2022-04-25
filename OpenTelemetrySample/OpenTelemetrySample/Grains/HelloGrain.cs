@@ -1,4 +1,7 @@
 using System.Diagnostics;
+using Datadog.Trace;
+using OpenTelemetrySample;
+using Serilog.Context;
 
 public class HelloGrain : IHelloGrain
 {
@@ -10,28 +13,18 @@ public class HelloGrain : IHelloGrain
     }
 
     public Task<string> SayHello(string greeting)
-    {
-        
-        // this code is probably wrong
-        var activitySource = new ActivitySource("ActivitySourceName");
-        var activityListener = new ActivityListener
+    {   
+        using (LogContext.PushProperty("dd_trace_id", CorrelationIdentifier.TraceId.ToString()))
+        using (LogContext.PushProperty("dd_span_id", CorrelationIdentifier.SpanId.ToString()))
         {
-            ShouldListenTo = s => true,
-            SampleUsingParentId = (ref ActivityCreationOptions<string> activityOptions) => ActivitySamplingResult.AllData,
-            Sample = (ref ActivityCreationOptions<ActivityContext> activityOptions) => ActivitySamplingResult.AllData
-        };
-        ActivitySource.AddActivityListener(activityListener);
+            using var activity = ActivitySourcesSetup.ActivitySource.StartActivity("GrainEntered");
 
-        using var activity = activitySource.StartActivity("MethodType:/Path");
-
-
-        _logger.LogInformation("entered simple api");
-
-
-
-        _logger.LogInformation("{@activity}", activity);
-        activity.AddEvent(new ActivityEvent(greeting));
-        activity.Stop();
-        return Task.FromResult($"You said: '{greeting}', I say: Hello!");
+            _logger.LogInformation("entered simple api");
+            
+            _logger.LogInformation("{@activity}", activity);
+            activity.AddEvent(new ActivityEvent(greeting));
+            activity.Stop();
+            return Task.FromResult($"You said: '{greeting}', I say: Hello!");
+        }
     }
 }

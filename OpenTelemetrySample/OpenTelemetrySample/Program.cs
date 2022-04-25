@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry;
@@ -63,6 +64,17 @@ builder.Services.AddOpenTelemetryMetrics(options =>
     options.SetResourceBuilder(rb)
         .AddAspNetCoreInstrumentation();
     options.AddMeter("OpenTelemetrySample.Meter");
+    options.AddRuntimeMetrics(options =>
+    {
+        options.ThreadingEnabled = true;
+        options.GcEnabled = true;
+        options.ProcessEnabled = true;
+    });
+    // var meter = new Meter("MyApplication");
+    //
+    // var counter = meter.CreateCounter<int>("Requests");
+    // var histogram = meter.CreateHistogram<float>("RequestDuration", unit: "ms");
+    //meter.CreateObservableGauge("ThreadCount", () => new[] { new Measurement<int>(ThreadPool.ThreadCount) });
     options.AddOtlpExporter(otlpOptions =>
     {
         otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/metrics");
