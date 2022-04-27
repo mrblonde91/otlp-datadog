@@ -11,16 +11,16 @@ using OpenTelemetry.Trace;
 using OpenTelemetrySample;
 using OpenTelemetrySample.Contracts;
 using Orleans;
-using Orleans.Configuration;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
-using Microsoft.Extensions.Hosting;
 using OpenTelemetrySample.Services;
-using Orleans.Statistics;
+using OpenTelemetrySample.Settings;
 
 ActivitySourcesSetup.Init();
 var builder = WebApplication.CreateBuilder(args);
+OtlpSettings settings = new OtlpSettings();
+builder.Configuration.GetSection("Otlp").Bind(settings);
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
@@ -28,7 +28,7 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.WithSpan()
     .WriteTo.Console()
     .WriteTo.Seq("http://seq:5341")
-    .Enrich.WithProperty("Application", "OpenTelemetrySample")
+    .Enrich.WithProperty("Application", settings.ServiceName)
     .Enrich.FromLogContext()
     .CreateLogger();
 
@@ -38,7 +38,7 @@ builder.SetupOrleansSilo();
 
 builder.Services.AddControllers();
 var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
-var rb = ResourceBuilder.CreateDefault().AddService("OpenTelemetrySample.OTLP",
+var rb = ResourceBuilder.CreateDefault().AddService(settings.ServiceName,
     serviceVersion: assemblyVersion, serviceInstanceId: Environment.MachineName);
 using var traceprovider = Sdk.CreateTracerProviderBuilder()
     .SetResourceBuilder(rb)
@@ -50,7 +50,7 @@ builder.Services.AddOpenTelemetryTracing((options) =>
     options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler()).AddAspNetCoreInstrumentation().AddHttpClientInstrumentation();
     options.AddOtlpExporter(otlpOptions =>
     {
-        otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/trace");
+        otlpOptions.Endpoint = new Uri(settings.Endpoint +"/api/v1/traces");
     });
 });
 
@@ -62,29 +62,20 @@ builder.Services.Configure<AspNetCoreInstrumentationOptions>(options =>
 builder.Services.AddOpenTelemetryMetrics(options =>
 {
     options.SetResourceBuilder(rb)
-        .AddAspNetCoreInstrumentation();
-    options.AddMeter("OpenTelemetrySample.Meter");
+        .AddAspNetCoreInstrumentation().AddHttpClientInstrumentation();
+    options.AddMeter("*");
     options.AddRuntimeMetrics(options =>
     {
         options.ThreadingEnabled = true;
         options.GcEnabled = true;
         options.ProcessEnabled = true;
     });
-    // var meter = new Meter("MyApplication");
-    //
-    // var counter = meter.CreateCounter<int>("Requests");
-    // var histogram = meter.CreateHistogram<float>("RequestDuration", unit: "ms");
-    //meter.CreateObservableGauge("ThreadCount", () => new[] { new Measurement<int>(ThreadPool.ThreadCount) });
     options.AddOtlpExporter(otlpOptions =>
-    {
-        otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/metrics");
-
+    { 
+        otlpOptions.Endpoint = new Uri(settings.Endpoint + "/api/v1/metrics");
     });
+    options.AddConsoleExporter();
 });
-
-builder.Services.AddTransient<IDynamoService, DynamoService>();
-
-builder.Services.AddEndpointsApiExplorer();
 
 builder.Logging.AddOpenTelemetry(options =>
 {
@@ -93,12 +84,14 @@ builder.Logging.AddOpenTelemetry(options =>
     options.ParseStateValues = true;
     options.IncludeFormattedMessage = true;
     options.AddOtlpExporter(otlpOptions =>
-   {
-       otlpOptions.Endpoint = new Uri("http://opentelemetry-collector:4317/api/v1/metrics");
-   });
+    {
+        otlpOptions.Endpoint = settings.Endpoint;
+    });
 });
 
 builder.Services.AddSwaggerGen();
+builder.Services.AddTransient<IDynamoService, DynamoService>();
+builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 app.UseSwagger();

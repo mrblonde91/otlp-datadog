@@ -32,18 +32,19 @@ public class HelloController : ControllerBase
         
         var meter = new Meter("OpenTelemetrySample.HelloController.Get");
 
-        var counter = meter.CreateCounter<int>("Requests");
-        var histogram = meter.CreateHistogram<float>("RequestDuration", unit: "ms");
-        meter.CreateObservableGauge("ThreadCount", () => new[] { new Measurement<int>(ThreadPool.ThreadCount) });
+        var counter = meter.CreateCounter<int>("OpenTelemetrySample.HelloController.Get.Requests");
+        var histogram = meter.CreateHistogram<float>("OpenTelemetrySample.HelloController.Get.RequestDuration", unit: "ms");
+        meter.CreateObservableGauge("OpenTelemetrySample.HelloController.Get.ThreadCount", () => new[] { new Measurement<int>(ThreadPool.ThreadCount) });
         
         using (LogContext.PushProperty("dd_trace_id", CorrelationIdentifier.TraceId.ToString()))
         using (LogContext.PushProperty("dd_span_id", CorrelationIdentifier.SpanId.ToString()))
         {
-            using var activity = ActivitySourcesSetup.ActivitySource.StartActivity("100 ms delay", ActivityKind.Server);
+            using var activity = ActivitySourcesSetup.ActivitySource.StartActivity("100 ms delay");
             var stopwatch = Stopwatch.StartNew();
             activity?.SetStartTime(DateTime.Now);
+            activity?.SetStatus(ActivityStatusCode.Ok);
             Baggage.Current = Baggage.Create(new Dictionary<string, string>(){{"name", name}});
-
+            await Task.Delay(100);
             _logger.LogInformation("{@activity}", activity);
             var helloGrain = _grainFactory.GetGrain<IHelloGrain>(name);
             await helloGrain.SayHello(name);

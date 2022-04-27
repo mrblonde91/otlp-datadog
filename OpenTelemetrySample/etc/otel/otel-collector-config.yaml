@@ -4,45 +4,25 @@ receivers:
       grpc:
       http:
   zipkin:
-  hostmetrics:
-    scrapers:
-      cpu:
-      disk:
-      filesystem:
-      load:
-      memory:
-      network:
-      process:
-      processes:
-  prometheus:
-    config:
-      scrape_configs:
-        - job_name: 'otel-collector'
-          scrape_interval: 5s
-          static_configs:
-            - targets: [ '0.0.0.0:8889' ]
 processors:
   batch:
     timeout: 10s
   resourcedetection:
-    detectors: [gce, ecs, ec2, azure, system]
+    detectors: [ecs,system,env]
 exporters:
-  datadog/api:
+  datadog:
     env: dev
     service: opentelemetrysample
     version: 1.0.0
-
+    metrics:
+      send_monotonic_counter: false
+      resource_attributes_as_tags: true
     tags:
       - otlp:tag
 
     api:
-      key: api_key
+      key: apikey
       site: datadoghq.com
-  zipkin:
-    endpoint: "http://zipkin:9411/api/v2/spans"
-  prometheus:
-    endpoint: "0.0.0.0:8889"
-    namespace: "default"
   logging:
     loglevel: debug
 extensions:
@@ -55,8 +35,8 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [datadog/api, logging, zipkin]
+      exporters: [datadog,logging,zipkin]
     metrics:
-      receivers: [otlp,prometheus]
-      processors: [batch]
-      exporters: [datadog/api,logging,prometheus]
+      receivers: [otlp]
+      processors: [batch,resourcedetection]
+      exporters: [datadog,logging]

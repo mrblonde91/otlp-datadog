@@ -33,14 +33,14 @@ services:
       - 4317:4317
       - 4318:4318
       - 8989:8989
-  datadog-agent:
-    image: "gcr.io/datadoghq/agent:latest"
-    env_file:
-      - ./.secrets.env
-    environment:
-      DD_APM_ENABLED: "true"
-      DD_APM_NON_LOCAL_TRAFFIC: "true"
-      DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
+  # datadog-agent:
+  #   image: "gcr.io/datadoghq/agent:latest"
+  #   env_file:
+  #     - ./.secrets.env
+  #   environment:
+  #     DD_APM_ENABLED: "true"
+  #     DD_APM_NON_LOCAL_TRAFFIC: "true"
+  #     DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
   zipkin:
     image: openzipkin/zipkin
     ports:

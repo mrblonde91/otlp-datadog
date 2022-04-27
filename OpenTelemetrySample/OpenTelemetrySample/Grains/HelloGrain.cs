@@ -20,7 +20,8 @@ public class HelloGrain : IHelloGrain
             using var activity = ActivitySourcesSetup.ActivitySource.StartActivity("GrainEntered");
 
             _logger.LogInformation("entered simple api");
-            
+            activity.SetStatus(ActivityStatusCode.Ok);
+            activity.DisplayName = "GrainEntered";
             _logger.LogInformation("{@activity}", activity);
             activity.AddEvent(new ActivityEvent(greeting));
             activity.Stop();
