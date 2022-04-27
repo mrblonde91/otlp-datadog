@@ -35,7 +35,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [datadog,logging,zipkin]
+      exporters: [datadog,logging]
     metrics:
       receivers: [otlp]
       processors: [batch,resourcedetection]
