@@ -400,3 +400,4 @@ FodyWeavers.xsd
 
 # Secrets for docker compose
 OpenTelemetrySample/.secrets.env
+.idea

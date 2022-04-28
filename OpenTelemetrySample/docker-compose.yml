@@ -10,16 +10,7 @@ services:
     depends_on:
       - opentelemetry-collector
     environment:
-      DD_ENV: "dev"
-      DD_SERVICE: "OpenTelemetrySample"
-      DD_VERSION: "1.0.0"
-      DD_AGENT_HOST: "datadog-agent"
-      DD_TRACE_ROUTE_TEMPLATE_RESOURCE_NAMES_ENABLED: "true"
-      DD_RUNTIME_METRICS_ENABLED: "true"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://opentelemetry-collector:4318/api/v1/trace"
-      DD_TRACE_ENABLED: "true"
-      DD_LOGS_INJECTION: "true"
-      DD_LOGS_INJECTION_ENABLED: "true"
     volumes:
       - $HOME/.aws/credentials:/home/app/.aws/credentials:ro
   opentelemetry-collector:
@@ -33,31 +24,3 @@ services:
       - 4317:4317
       - 4318:4318
       - 8989:8989
-  # datadog-agent:
-  #   image: "gcr.io/datadoghq/agent:latest"
-  #   env_file:
-  #     - ./.secrets.env
-  #   environment:
-  #     DD_APM_ENABLED: "true"
-  #     DD_APM_NON_LOCAL_TRAFFIC: "true"
-  #     DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
-  zipkin:
-    image: openzipkin/zipkin
-    ports:
-      - 9411:9411
-
-  seq:
-    image: datalust/seq:latest
-    restart: always
-    ports:
-      - "5342:80"
-      - "5341:5341"
-    environment:
-      - ACCEPT_EULA=Y
-  prometheus:
-    image: prom/prometheus:v2.30.3
-    ports:
-      - 9000:9090
-    volumes:
-    - ./prometheus:/etc/prometheus
-    command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yaml

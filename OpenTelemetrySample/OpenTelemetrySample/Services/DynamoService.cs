@@ -20,6 +20,7 @@ public class DynamoService : IDynamoService
 
         AmazonDynamoDBClient client = new AmazonDynamoDBClient(profile, RegionEndpoint.USWest2);
         string tableName = "OtlpTestTable";
+        
         Random random = new Random();
         var request = new PutItemRequest
         {
