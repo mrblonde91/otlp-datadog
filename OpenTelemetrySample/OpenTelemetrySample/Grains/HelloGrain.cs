@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Datadog.Trace;
 using OpenTelemetrySample;
 using Serilog.Context;
+using Shared;
 
 public class HelloGrain : IHelloGrain
 {
@@ -28,4 +29,5 @@ public class HelloGrain : IHelloGrain
             return Task.FromResult($"You said: '{greeting}', I say: Hello!");
         }
     }
+    
 }

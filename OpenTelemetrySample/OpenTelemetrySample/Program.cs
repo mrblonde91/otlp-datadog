@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Diagnostics.Metrics;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry;
@@ -8,18 +7,17 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using OpenTelemetrySample;
 using OpenTelemetrySample.Contracts;
-using Orleans;
+using OpenTelemetrySample.Services;
+using OpenTelemetrySample.Settings;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
-using OpenTelemetrySample.Services;
-using OpenTelemetrySample.Settings;
+using Shared;
 
 ActivitySourcesSetup.Init();
 var builder = WebApplication.CreateBuilder(args);
-OtlpSettings settings = new OtlpSettings();
+var settings = new OtlpSettings();
 builder.Configuration.GetSection("Otlp").Bind(settings);
 
 Log.Logger = new LoggerConfiguration()
@@ -27,7 +25,6 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .Enrich.WithSpan()
     .WriteTo.Console()
-    .WriteTo.Seq("http://seq:5341")
     .Enrich.WithProperty("Application", settings.ServiceName)
     .Enrich.FromLogContext()
     .CreateLogger();
@@ -44,20 +41,15 @@ using var traceprovider = Sdk.CreateTracerProviderBuilder()
     .SetResourceBuilder(rb)
     .AddSource("OpenTelemetrySample.Tracing").Build();
 
-builder.Services.AddOpenTelemetryTracing((options) =>
+builder.Services.AddOpenTelemetryTracing(options =>
 {
     options.AddSource("OpenTelemetrySample.Tracing");
-    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler()).AddAspNetCoreInstrumentation().AddHttpClientInstrumentation();
-    options.AddOtlpExporter(otlpOptions =>
-    {
-        otlpOptions.Endpoint = new Uri(settings.Endpoint +"/api/v1/traces");
-    });
+    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler()).AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation();
+    options.AddOtlpExporter(otlpOptions => { otlpOptions.Endpoint = new Uri(settings.Endpoint + "/api/v1/traces"); });
 });
 
-builder.Services.Configure<AspNetCoreInstrumentationOptions>(options =>
-{
-    options.RecordException = true;
-});
+builder.Services.Configure<AspNetCoreInstrumentationOptions>(options => { options.RecordException = true; });
 
 builder.Services.AddOpenTelemetryMetrics(options =>
 {
@@ -70,10 +62,7 @@ builder.Services.AddOpenTelemetryMetrics(options =>
         options.GcEnabled = true;
         options.ProcessEnabled = true;
     });
-    options.AddOtlpExporter(otlpOptions =>
-    { 
-        otlpOptions.Endpoint = new Uri(settings.Endpoint + "/api/v1/metrics");
-    });
+    options.AddOtlpExporter(otlpOptions => { otlpOptions.Endpoint = new Uri(settings.Endpoint + "/api/v1/metrics"); });
     options.AddConsoleExporter();
 });
 
@@ -83,10 +72,7 @@ builder.Logging.AddOpenTelemetry(options =>
     options.IncludeScopes = true;
     options.ParseStateValues = true;
     options.IncludeFormattedMessage = true;
-    options.AddOtlpExporter(otlpOptions =>
-    {
-        otlpOptions.Endpoint = settings.Endpoint;
-    });
+    options.AddOtlpExporter(otlpOptions => { otlpOptions.Endpoint = settings.Endpoint; });
 });
 
 builder.Services.AddSwaggerGen();
@@ -105,15 +91,4 @@ app.MapGet(Endpoints.GetSimpleApiCall, ([FromServices] ILogger<Program> logger) 
 
     logger.LogInformation("Server Activity: {@Activity}", currentActivity);
 });
-
-app.MapGet(Endpoints.GetOrleansApiCall, async ([FromServices] ILogger<Program> logger, [FromServices] IGrainFactory grainFactory) =>
-{
-    const string name = "Orleans";
-    var currentActivity = Activity.Current;
-    logger.LogInformation("Server Activity: {@Activity}", currentActivity);
-    
-    var helloGrain = grainFactory.GetGrain<IHelloGrain>(name);
-    await helloGrain.SayHello(name);
-});
-
 app.Run();

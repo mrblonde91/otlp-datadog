@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace OpenTelemetrySample;
+namespace Shared;
 
 public static class ActivitySourcesSetup
 {

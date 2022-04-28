@@ -1,18 +1,22 @@
 ﻿using System.Diagnostics;
+using Datadog.Trace;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetrySample.Contracts;
 using Serilog;
+using Serilog.Context;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
+using Shared;
+
+ActivitySourcesSetup.Init();
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .Enrich.WithSpan()
     .WriteTo.Console()
-    .WriteTo.Seq("http://localhost:5341")
     .Enrich.WithProperty("Application", "OpenTelemetrySample.Client")
     .Enrich.FromLogContext()
     .CreateLogger();
@@ -38,19 +42,29 @@ await SimpleCall();
 await OrleansCall();
 
 async Task SimpleCall()
-{
-    using var activity = source.StartActivity("Get Simple Api Call", ActivityKind.Client);
-    Log.Information("Client Activity: {@Activity}", activity);
-    var client = new HttpClient();
-    var response = await client.GetAsync($"http://localhost:5009/{Endpoints.GetSimpleApiCall}");
-    activity?.Stop();
+{        
+    using (LogContext.PushProperty("dd_trace_id", CorrelationIdentifier.TraceId.ToString()))
+    using (LogContext.PushProperty("dd_span_id", CorrelationIdentifier.SpanId.ToString()))
+    {
+        using var activity =
+            ActivitySourcesSetup.ActivitySource.StartActivity("Get Simple Api Call", ActivityKind.Client);
+        Log.Information("Client Activity: {@Activity}", activity);
+        var client = new HttpClient();
+        var response = await client.GetAsync($"http://localhost:5009/{Endpoints.GetSimpleApiCall}");
+        activity?.Stop();
+    }
 }
 
 async Task OrleansCall()
-{
-    using var activity = source.StartActivity("Get Orleans Api Call", ActivityKind.Client);
-    Log.Information("Client Activity: {@Activity}", activity);
-    var client = new HttpClient();
-    var response = await client.GetAsync($"http://localhost:5009/{Endpoints.GetOrleansApiCall}");
-    activity?.Stop();
+{        
+    using (LogContext.PushProperty("dd_trace_id", CorrelationIdentifier.TraceId.ToString()))
+    using (LogContext.PushProperty("dd_span_id", CorrelationIdentifier.SpanId.ToString()))
+    {
+        using var activity =
+            ActivitySourcesSetup.ActivitySource.StartActivity("Get Orleans Api Call", ActivityKind.Client);
+        Log.Information("Client Activity: {@Activity}", activity);
+        var client = new HttpClient();
+        var response = await client.GetAsync($"http://localhost:5009/{Endpoints.GetOrleansApiCall}");
+        activity?.Stop();
+    }
 }

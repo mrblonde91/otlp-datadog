@@ -10,6 +10,7 @@ using OpenTelemetrySample.Services;
 using OpenTelemetrySample.Settings;
 using Orleans;
 using Serilog.Context;
+using Shared;
 
 namespace OpenTelemetrySample.Controllers;
 
@@ -33,27 +34,21 @@ public class HelloController : ControllerBase
     [HttpGet]
     public async Task<string> Get(string name)
     {
-        
-        var meter = new Meter("OpenTelemetrySample.HelloController.Get");
-
-        var counter = meter.CreateCounter<int>("OpenTelemetrySample.HelloController.Get.Requests");
-        var histogram = meter.CreateHistogram<float>("OpenTelemetrySample.HelloController.Get.RequestDuration", unit: "ms");
-        meter.CreateObservableGauge("OpenTelemetrySample.HelloController.Get.ThreadCount", () => new[] { new Measurement<int>(ThreadPool.ThreadCount) });
-        
         using (LogContext.PushProperty("dd_trace_id", CorrelationIdentifier.TraceId.ToString()))
         using (LogContext.PushProperty("dd_span_id", CorrelationIdentifier.SpanId.ToString()))
         {
             using var activity = ActivitySourcesSetup.ActivitySource.StartActivity("100 ms delay");
-            var stopwatch = Stopwatch.StartNew();
+            
             activity?.SetStartTime(DateTime.Now);
             activity?.SetStatus(ActivityStatusCode.Ok);
-            Baggage.Current = Baggage.Create(new Dictionary<string, string>(){{"name", name}});
+            
             await Task.Delay(100);
             _logger.LogInformation("{@activity}", activity);
             var helloGrain = _grainFactory.GetGrain<IHelloGrain>(name);
             await helloGrain.SayHello(name);
 
-            activity?.SetTag("Test", $"{name}");
+            activity?.SetTag("TestTag", $"{name}");
+            
             if (_monitor.CurrentValue.UseDynamoDb)
             {
                 await _dynamoService.PutItem(name);
@@ -61,11 +56,31 @@ public class HelloController : ControllerBase
 
             activity?.SetEndTime(DateTime.Now);
             _logger.LogInformation("Hello {Name}", name);
-            
-            histogram.Record(stopwatch.ElapsedMilliseconds,
-                tag: KeyValuePair.Create<string, object?>("Host", "otlptest"));
             return await Task.FromResult($"Hello {name}");
         }
+    }
 
+    [HttpGet("metrics")]
+    public async Task<string> Get()
+    {
+        Random rnd = new Random();
+        var meter = new Meter("OpenTelemetrySample.HelloController.Get");
+
+        var counter = meter.CreateCounter<int>("OpenTelemetrySample.HelloController.Get.Requests");
+        var histogram =
+            meter.CreateHistogram<float>("OpenTelemetrySample.HelloController.Get.RequestDuration", unit: "ms");
+        meter.CreateObservableGauge("OpenTelemetrySample.HelloController.Get.ThreadCount",
+            () => new[] { new Measurement<int>(ThreadPool.ThreadCount) });
+
+        using (LogContext.PushProperty("dd_trace_id", CorrelationIdentifier.TraceId.ToString()))
+        using (LogContext.PushProperty("dd_span_id", CorrelationIdentifier.SpanId.ToString()))
+        {
+            var stopwatch = Stopwatch.StartNew();
+            await Task.Delay(rnd.Next(100,5000));
+
+            histogram.Record(stopwatch.ElapsedMilliseconds,
+                tag: KeyValuePair.Create<string, object?>("Host", "otlptest"));
+            return await Task.FromResult($"Successfully output metrics");
+        }
     }
 }
