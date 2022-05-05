@@ -2,8 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetrySample", "OpenTelemetrySample\OpenTelemetrySample.csproj", "{F6A174CA-8DFD-4E2E-A8DC-56E6A62929BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetrySample.Client", "OpenTelemetrySample.Client\OpenTelemetrySample.Client.csproj", "{59667BCC-E040-4C4F-8A88-6EFFA90CC722}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetrySample.Contracts", "OpenTelemetrySample.Contracts\OpenTelemetrySample.Contracts.csproj", "{0F84C2C7-54D2-4113-838F-C37EEA50A3B3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{51FDD6EA-C9D8-4416-836D-E5A26D6DB578}"
@@ -18,10 +16,6 @@ Global
 		{F6A174CA-8DFD-4E2E-A8DC-56E6A62929BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6A174CA-8DFD-4E2E-A8DC-56E6A62929BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6A174CA-8DFD-4E2E-A8DC-56E6A62929BA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{59667BCC-E040-4C4F-8A88-6EFFA90CC722}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{59667BCC-E040-4C4F-8A88-6EFFA90CC722}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{59667BCC-E040-4C4F-8A88-6EFFA90CC722}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{59667BCC-E040-4C4F-8A88-6EFFA90CC722}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0F84C2C7-54D2-4113-838F-C37EEA50A3B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0F84C2C7-54D2-4113-838F-C37EEA50A3B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F84C2C7-54D2-4113-838F-C37EEA50A3B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
