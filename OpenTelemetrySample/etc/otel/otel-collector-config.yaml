@@ -1,42 +1,44 @@
 receivers:
+  prometheus:
   otlp:
     protocols:
       grpc:
       http:
-  zipkin:
 processors:
   batch:
     timeout: 10s
   resourcedetection:
-    detectors: [ecs,system,env]
+    detectors: [system,env]
+  attributes:
+    actions:
+      - key: environment
+        value: dev
+        action: insert
+      - key: region
+        value: us-west-2
+        action: insert
 exporters:
-  datadog:
-    env: dev
-    service: opentelemetrysample
-    version: 1.0.0
-    metrics:
-      send_monotonic_counter: false
-      resource_attributes_as_tags: true
-    tags:
-      - otlp:tag
-
-    api:
-      key: apikey
-      site: datadoghq.com
   logging:
-    loglevel: debug
+  prometheusremotewrite:
+    endpoint: http://prometheus:9090/api/v1/write
+  otlp:
+    endpoint: tempo:4007
+    tls:
+      insecure: true    
+
 extensions:
   health_check:
-  pprof:
-  zpages:
 service:
-  extensions: [health_check,pprof,zpages]
+  telemetry:
+    logs:
+      level: "debug"
+  extensions: [health_check]
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch, resourcedetection]
-      exporters: [datadog,logging]
+      processors: [batch, resourcedetection, attributes]
+      exporters: [otlp]
     metrics:
       receivers: [otlp]
       processors: [batch,resourcedetection]
-      exporters: [datadog,logging]
+      exporters: [logging,prometheusremotewrite]

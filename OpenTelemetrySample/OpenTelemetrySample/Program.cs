@@ -41,16 +41,6 @@ using var traceprovider = Sdk.CreateTracerProviderBuilder()
     .SetResourceBuilder(rb)
     .AddSource("OpenTelemetrySample.Tracing").Build();
 
-builder.Services.AddOpenTelemetryTracing(options =>
-{
-    options.AddSource("OpenTelemetrySample.Tracing");
-    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler()).AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation();
-    options.AddOtlpExporter(otlpOptions => { otlpOptions.Endpoint = new Uri(settings.Endpoint + "/api/v1/traces"); });
-});
-
-builder.Services.Configure<AspNetCoreInstrumentationOptions>(options => { options.RecordException = true; });
-
 builder.Services.AddOpenTelemetryMetrics(options =>
 {
     options.SetResourceBuilder(rb)
@@ -64,6 +54,13 @@ builder.Services.AddOpenTelemetryMetrics(options =>
     });
     options.AddOtlpExporter(otlpOptions => { otlpOptions.Endpoint = new Uri(settings.Endpoint + "/api/v1/metrics"); });
     options.AddConsoleExporter();
+});
+builder.Services.AddOpenTelemetryTracing(options =>
+{
+    options.AddSource("Email.RiskScore.Tracing");
+    options.SetResourceBuilder(rb).SetSampler(new AlwaysOnSampler()).AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation();
+    options.AddOtlpExporter(otlpOptions => { otlpOptions.Endpoint = new Uri(settings.Endpoint + "/api/v1/traces"); });
 });
 
 builder.Logging.AddOpenTelemetry(options =>

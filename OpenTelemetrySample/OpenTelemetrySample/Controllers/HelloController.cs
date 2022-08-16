@@ -48,11 +48,8 @@ public class HelloController : ControllerBase
             await helloGrain.SayHello(name);
 
             activity?.SetTag("TestTag", $"{name}");
-            
-            if (_monitor.CurrentValue.UseDynamoDb)
-            {
+
                 await _dynamoService.PutItem(name);
-            }
 
             activity?.SetEndTime(DateTime.Now);
             _logger.LogInformation("Hello {Name}", name);

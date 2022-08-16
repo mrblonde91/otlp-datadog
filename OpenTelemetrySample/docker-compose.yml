@@ -1,26 +1,75 @@
 version: "3.9"
+
+networks:
+  telemetry:
 services:
-  web:
-    build:
-      context: ./
-      dockerfile: ./OpenTelemetrySample/Dockerfile
+  # datadog-agent:
+  #   image: "gcr.io/datadoghq/agent:latest"
+  #   env_file:
+  #     - ./.secrets.env
+  #   environment:
+  #     DD_APM_ENABLED: "true"
+  #     DD_APM_NON_LOCAL_TRAFFIC: "true"
+  #     DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
+  ##web:
+    # build:
+    #   context: ./
+    #   dockerfile: ./OpenTelemetrySample/Dockerfile
+    # ports:
+    #   - "5009:80"
+    #   - "5010:443"
+    # depends_on:
+    #   - opentelemetry-collector
+    # environment:
+    #   OTEL_EXPORTER_OTLP_ENDPOINT: "http://opentelemetry-collector:4318/api/v1/trace"
+    # volumes:
+    #   - $HOME/.aws/credentials:/home/app/.aws/credentials:ro
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
     ports:
-      - "5009:80"
-      - "5010:443"
-    depends_on:
-      - opentelemetry-collector
-    environment:
-      OTEL_EXPORTER_OTLP_ENDPOINT: "http://opentelemetry-collector:4318/api/v1/trace"
+      - "9090:9090"
+    command: --enable-feature=remote-write-receiver --config.file=/etc/prometheus/prometheus.yml
+    networks:
+      - telemetry
     volumes:
-      - $HOME/.aws/credentials:/home/app/.aws/credentials:ro
+      - prometheus-datad:/prometheus
+  grafana:
+    image: grafana/grafana-oss:latest
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - telemetry
+    volumes:
+      - grafana-data:/var/lib/grafana
   opentelemetry-collector:
-    image: otel/opentelemetry-collector-contrib
+    image: "otel/opentelemetry-collector-contrib:0.56.0"
     command: [ "--config=/etc/otel/config.yaml" ]
     privileged: true
     volumes:
       - ./etc/otel/otel-collector-config.yaml:/etc/otel/config.yaml
-
     ports:
       - 4317:4317
       - 4318:4318
       - 8989:8989
+      - 8126:8126
+    networks:
+      - telemetry
+  tempo:
+    # https://github.com/grafana/tempo/releases
+    image: grafana/tempo:1.4.1
+    container_name: tempo
+    command: [ "-config.file=/etc/otel/tempo.yml" ]
+    volumes:
+      - ./etc/otel/tempo.yml:/etc/otel/tempo.yml
+    restart: unless-stopped
+    ports:
+      - 3200:3200  # tempo
+      - 4007:4317  # otlp grpc
+    networks:
+      - telemetry
+volumes:
+  loki-data:
+  prometheus-datad:
+  grafana-data:
